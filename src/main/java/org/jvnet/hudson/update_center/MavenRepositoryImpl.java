@@ -85,6 +85,9 @@ import java.util.TreeMap;
  * @author Kohsuke Kawaguchi
  */
 public class MavenRepositoryImpl extends MavenRepository {
+	
+	static public final String MAVEN_REPO_PROPERTY="jenkins.mavenRepo";
+	
     protected NexusIndexer indexer;
     protected ArtifactFactory af;
     protected ArtifactResolver ar;
@@ -113,10 +116,19 @@ public class MavenRepositoryImpl extends MavenRepository {
         ar = plexus.lookup(ArtifactResolver.class);
         arf = plexus.lookup(ArtifactRepositoryFactory.class);
 
-        localRepo = new File(new File(System.getProperty("user.home")), ".m2/repository");
-        local = arf.createArtifactRepository("local",
-                localRepo.toURI().toURL().toExternalForm(),
-                new DefaultRepositoryLayout(), POLICY, POLICY);
+        final String mavenRepoProperty = System.getProperty(MAVEN_REPO_PROPERTY);
+        
+        if(mavenRepoProperty==null || mavenRepoProperty.isEmpty()) {
+        	localRepo = new File(new File(System.getProperty("user.home")), ".m2/repository");
+        	local = arf.createArtifactRepository("local",
+        			localRepo.toURI().toURL().toExternalForm(),
+        			new DefaultRepositoryLayout(), POLICY, POLICY);
+        }else {
+        	localRepo = new File(mavenRepoProperty);
+        	local = arf.createArtifactRepository("local",
+        			localRepo.toURI().toURL().toExternalForm(),
+        			new DefaultRepositoryLayout(), POLICY, POLICY);
+        }
     }
 
     /**

@@ -160,6 +160,10 @@ public class Main {
             "If not set, required Java version will be ignored")
     @CheckForNull
     public String javaVersion;
+    
+    @Option(name="-mavenRepo",usage="Define a location of maven repo, beeing the target "+
+    		"directory for the downloads. If not defined user.home/.m2 is used.")
+    public String mavenRepo;
 
     @Option(name="-skip-plugin-versions",usage="Skip generation of plugin versions")
     public boolean skipPluginVersions;
@@ -252,7 +256,7 @@ public class Main {
         if (www!=null) {
             prepareStandardDirectoryLayout();
         }
-
+        
         MavenRepository repo = createRepository();
 
         LatestLinkBuilder latest = createHtaccessWriter();
@@ -351,6 +355,15 @@ public class Main {
 
     protected MavenRepository createRepository() throws Exception {
 
+    	  if(mavenRepo!=null) {
+          	final File repoFile = new File(mavenRepo);
+          	if(repoFile.exists() && repoFile.isDirectory()) {
+          		System.setProperty(MavenRepositoryImpl.MAVEN_REPO_PROPERTY, mavenRepo);
+          	}else {
+          		System.out.println("Given mavenRepo isn't an existing directory, using default.");
+          	}
+          }
+    	
         MavenRepositoryImpl base = DefaultMavenRepositoryBuilder.getInstance();
 
         // ensure that we reset plugin filters between batch executions
